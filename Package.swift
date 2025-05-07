@@ -1,24 +1,29 @@
 // swift-tools-version: 6.1
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
+import CompilerPluginSupport
 
 let package = Package(
     name: "NovaToolbox",
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "NovaToolbox",
-            targets: ["NovaToolbox"]),
+            targets: ["NovaToolbox"]
+        ),
+        .library(name: "NovaMacros", targets: ["NovaMacros"])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-syntax.git", branch: "main")
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "NovaToolbox"),
-        .testTarget(
-            name: "NovaToolboxTests",
-            dependencies: ["NovaToolbox"]
+        .macro(
+            name: "NovaMacrosImplementation",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+            ]
         ),
+        .target(name: "NovaMacros", dependencies: ["NovaMacrosImplementation"]),
+        .target(name: "NovaToolbox"),
+        .testTarget(name: "NovaToolboxTests", dependencies: ["NovaToolbox"]),
     ]
 )
