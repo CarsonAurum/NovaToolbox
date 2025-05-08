@@ -110,7 +110,15 @@ public struct CodingKeysMacro: MemberMacro {
             return []
         }
         
-        return []
+        // Generate CodingKeys enum
+        let generator = CodingKeysGenerator(option: option, properties: properties)
+        let decl = generator
+            .generate()
+            .formatted()
+            .as(EnumDeclSyntax.self)!
+        return [
+            DeclSyntax(decl)
+        ]
     }
     
     
@@ -171,6 +179,84 @@ fileprivate enum CodingKeysOption {
         case .all: []
         case .select(let arr), .exclude(let arr): arr
         case .custom(let dict): .init(dict.keys)
+        }
+    }
+}
+
+// MARK: - CodingKeysGenerator
+
+fileprivate struct CodingKeysGenerator {
+    let option: CodingKeysOption
+    let properties: [String]
+    
+    func generate() -> EnumDeclSyntax {
+        EnumDeclSyntax(
+            name: .identifier("CodingKeys"),
+            inheritanceClause: InheritanceClauseSyntax {
+                InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "String"))
+                InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "CodingKey"))
+            }) {
+                MemberBlockItemListSyntax(
+                    generateStrategy().map { strat in
+                        MemberBlockItemSyntax(decl: EnumCaseDeclSyntax(elements: EnumCaseElementListSyntax(arrayLiteral: strat.enumCaseElementSyntax())))}
+                )
+        }
+    }
+    
+    func generateStrategy() -> [CodingKeysStrategy] {
+        properties.map {
+            switch option {
+            case .all:
+                return .equal($0, $0.toSnakeCase())
+            case .select(let selectedProperties):
+                if selectedProperties.contains($0) {
+                    return .equal($0, $0.toSnakeCase())
+                } else {
+                    return .skip($0)
+                }
+            case .exclude(let excludedProperties):
+                if excludedProperties.contains($0) {
+                    return .skip($0)
+                } else {
+                    return .equal($0, $0.toSnakeCase())
+                }
+            case .custom(let customNames):
+                if customNames.map(\.key).contains($0),
+                   let value = customNames[$0] {
+                    return .equal($0, value)
+                } else {
+                    return .equal($0, $0.toSnakeCase())
+                }
+            }
+        }
+        .map { (strategy: CodingKeysStrategy) in
+            switch strategy {
+            case .equal(let key, let value):
+                if key == value { return .skip(key) }
+            default:
+                break
+            }
+            return strategy
+        }
+    }
+}
+
+extension CodingKeysGenerator {
+    enum CodingKeysStrategy {
+        case equal(String, String)
+        case skip(String)
+        
+        func enumCaseElementSyntax() -> EnumCaseElementSyntax {
+            switch self {
+            case .equal(let caseName, let value):
+                EnumCaseElementSyntax(
+                    name: .identifier(caseName),
+                    rawValue: InitializerClauseSyntax(
+                        equal: .equalToken(),
+                        value: StringLiteralExprSyntax(content: value)))
+            case .skip(let caseName):
+                EnumCaseElementSyntax(name: .identifier(caseName))
+            }
         }
     }
 }
