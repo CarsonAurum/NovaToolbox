@@ -72,12 +72,14 @@ public struct CodingKeysMacro: MemberMacro {
         }
         
         // Ensure the struct conforms to Codable
-        let conformsToCodable = protocols
-            .map { $0.trimmedDescription }
-            .contains("Codable")
-        if !conformsToCodable {
-            context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.test(protocols.description)))
-            return []
+        if let inheritanceClause = structDecl.inheritanceClause {
+            let conformsToCodable = inheritanceClause.inheritedTypes
+                .map { $0.trimmedDescription }
+                .contains("Codable")
+            if !conformsToCodable {
+                context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.test(protocols.description)))
+                return []
+            }
         }
         return []
     }
