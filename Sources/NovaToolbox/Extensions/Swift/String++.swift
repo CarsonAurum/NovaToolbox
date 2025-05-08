@@ -35,4 +35,45 @@ extension String {
     public mutating func snakeCased() {
         self = toSnakeCase()
     }
+    
+    /// Converts a lower-camel-case string into a space-separated, title-cased string.
+    ///
+    ///     "thisIsATest".lowerCamelCaseToTitleCase()   // → "This Is A Test"
+    ///     "anotherExampleHere".lowerCamelCaseToTitleCase()  // → "Another Example Here"
+    ///
+    /// - Returns: A `Title Cased` string.
+    public func toTitleCase() -> String {
+        // 1) Insert spaces before uppercase letters
+        var withSpaces = ""
+        for character in self {
+            if character.isUppercase {
+                withSpaces.append(" ")
+            }
+            withSpaces.append(character)
+        }
+
+        // 2) Walk through spaced string and title-case each word
+        var result = ""
+        var shouldCapitalizeNext = true
+        
+        for character in withSpaces {
+            if character.isWhitespace {
+                // Preserve spaces and mark that next letter starts a new word
+                result.append(character)
+                shouldCapitalizeNext = true
+            } else {
+                let s = String(character)
+                if shouldCapitalizeNext {
+                    // Uppercase first letter of each word
+                    result.append(contentsOf: s.uppercased())
+                } else {
+                    // Lowercase all other letters
+                    result.append(contentsOf: s.lowercased())
+                }
+                shouldCapitalizeNext = false
+            }
+        }
+        
+        return result
+    }
 }

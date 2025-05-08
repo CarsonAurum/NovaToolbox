@@ -35,12 +35,12 @@ public struct PrettyDescriptionMacro: MemberMacro {
             return []
         }
         
+        // Handle OptionSet conformance by listing contained options
         let conformsToOptionSet = inheritanceClause.inheritedTypes
             .map(\.type.trimmedDescription)
             .contains("OptionSet")
         
         if conformsToOptionSet {
-            // Handle OptionSet conformance by listing contained options
             // Collect all static let options defined within the struct
             var optionNames: [String] = []
             for member in structDecl.memberBlock.members {
@@ -117,7 +117,12 @@ enum PrettyDescriptionDiagnostic: DiagnosticMessage {
     }
 
     var diagnosticID: MessageID {
-        MessageID(domain: "PrettyDescriptionMacro", id: "notStruct")
+        switch self {
+        case .notStruct:
+            MessageID(domain: "PrettyDescriptionMacro", id: "notStruct")
+        case .notCustomStringConvertible:
+            MessageID(domain: "PrettyDescriptionMacro", id: "notCustomStringConvertible")
+        }
     }
 
     var severity: DiagnosticSeverity { .error }
