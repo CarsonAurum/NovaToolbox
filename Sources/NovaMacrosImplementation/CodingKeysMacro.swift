@@ -11,21 +11,6 @@ import SwiftSyntaxMacros
 import SwiftDiagnostics
 import NovaToolbox
 
-fileprivate enum CodingKeysOption {
-    case all
-    case select([String])
-    case exclude([String])
-    case custom([String: String])
-    
-    var properties: [String] {
-        switch self {
-        case .all: []
-        case .select(let arr), .exclude(let arr): arr
-        case .custom(let dict): .init(dict.keys)
-        }
-    }
-}
-
 public struct CodingKeysMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
@@ -146,8 +131,12 @@ enum CodingKeysDiagnostic: DiagnosticMessage {
             return "‘@CodingKeys’ can only be applied to struct declarations."
         case .notCodable:
             return "Structs annotated with ‘@CodingKeys’ must conform to ‘Codable’."
-        default:
-            fatalError()
+        case .noArgument:
+            return "'@CodingKeys' requires at least one argument."
+        case .invalidArgument:
+            return "Invalid argument provided to '@CodingKeys' macro."
+        case .nonexistentProperty(let structName, let propertyName):
+            return "Struct '\(structName)' has no property named '\(propertyName)'."
         }
     }
 
@@ -157,10 +146,31 @@ enum CodingKeysDiagnostic: DiagnosticMessage {
             return MessageID(domain: "CodingKeysMacro", id: "notStruct")
         case .notCodable:
             return MessageID(domain: "CodingKeysMacro", id: "notCodable")
-        default:
-            fatalError()
+        case .noArgument:
+            return MessageID(domain: "CodingKeysMacro", id: "noArgument")
+        case .invalidArgument:
+            return MessageID(domain: "CodingKeysMacro", id: "invalidArgument")
+        case .nonexistentProperty:
+            return MessageID(domain: "CodingKeysMacro", id: "nonexistentProperty")
         }
     }
 
     var severity: DiagnosticSeverity { .error }
+}
+
+// MARK: - CodingKeysOption
+
+fileprivate enum CodingKeysOption {
+    case all
+    case select([String])
+    case exclude([String])
+    case custom([String: String])
+    
+    var properties: [String] {
+        switch self {
+        case .all: []
+        case .select(let arr), .exclude(let arr): arr
+        case .custom(let dict): .init(dict.keys)
+        }
+    }
 }
