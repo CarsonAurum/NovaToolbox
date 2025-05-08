@@ -46,12 +46,12 @@ public struct PrettyDescriptionMacro: MemberMacro {
         public var description: String {
             var parts: [String] = []
         \(lines)
-            return parts.joined(separator: " || ")
+            return "[\\(parts.joined(separator: " || "))]"
         }
         """
 
         // Parse into a DeclSyntax
-        let decl = try DeclSyntax(stringLiteral: source)
+        let decl = DeclSyntax(stringLiteral: source)
         return [decl]
     }
 }
