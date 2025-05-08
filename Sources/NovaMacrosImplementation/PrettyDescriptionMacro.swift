@@ -36,9 +36,9 @@ public struct PrettyDescriptionMacro: MemberMacro {
         // Build the body of the description property
         let lines = properties.map { prop in
             if prop.isOptional {
-                return "        if let value = \(prop.name) { parts.append(\"\(prop.name): \\(value)\") }"
+                return "if let value = \(prop.name) { parts.append(\"\(prop.name): \\(value)\") }"
             } else {
-                return "        parts.append(\"\(prop.name): \\(\(prop.name))\")"
+                return "parts.append(\"\(prop.name): \\(\(prop.name))\")"
             }
         }.joined(separator: "\n")
 
@@ -51,7 +51,7 @@ public struct PrettyDescriptionMacro: MemberMacro {
         """
 
         // Parse into a DeclSyntax
-        let decl = DeclSyntax(stringLiteral: source)
+        let decl = DeclSyntax(stringLiteral: source).formatted()
         return [decl]
     }
 }
