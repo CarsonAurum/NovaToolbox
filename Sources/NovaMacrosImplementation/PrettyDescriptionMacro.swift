@@ -37,7 +37,7 @@ public struct PrettyDescriptionMacro: MemberMacro {
 
             // Build switch-case lines for description
             let caseLines = caseNames.map { name in
-                "case .\(name): return \"\(name)\""
+                "case .\(name): return \"\(name.toTitleCase())\""
             }.joined(separator: "\n        ")
 
             let source = """
