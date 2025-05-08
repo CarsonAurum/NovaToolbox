@@ -40,8 +40,33 @@ public struct PrettyDescriptionMacro: MemberMacro {
             .contains("OptionSet")
         
         if conformsToOptionSet {
-            // TODO: Complete this
-            return []
+            // Handle OptionSet conformance by listing contained options
+            // Collect all static let options defined within the struct
+            var optionNames: [String] = []
+            for member in structDecl.memberBlock.members {
+                if let varDecl = member.decl.as(VariableDeclSyntax.self),
+                   varDecl.modifiers.contains(where: { $0.name.text == "static" }) == true,
+                   let binding = varDecl.bindings.first,
+                   let id = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier {
+                    optionNames.append(id.text)
+                }
+            }
+
+            // Build the body of the description property for OptionSet
+            let optionLines = optionNames.map { name in
+                "if self.contains(.\(name)) { parts.append(\"\(name)\") }"
+            }.joined(separator: "\n")
+
+            let optionSource = """
+            public var description: String {
+                var parts: [String] = []
+                \(optionLines)
+                return "[\\(parts.joined(separator: \", \"))]"
+            }
+            """
+
+            let optionDecl = DeclSyntax(stringLiteral: optionSource)
+            return [optionDecl]
         } else {
             // Collect each property name and whether it's optional
             var properties: [(name: String, isOptional: Bool)] = []
