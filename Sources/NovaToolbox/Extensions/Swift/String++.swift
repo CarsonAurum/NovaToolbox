@@ -6,6 +6,15 @@
 //
 
 extension String {
+    
+    /// Converts a `lowerCamelCaseString` to `snake_case`.
+    ///
+    /// This method transforms any uppercase characters into lowercase and inserts underscores before them. If the string is empty, it returns the original string.
+    ///
+    ///     let result = "someCamelCaseString".toSnakeCase()    // "some_camel_case_string"
+    ///     let result = "".toSnakeCase()                       // ""
+    ///
+    /// - Returns: A new string in `snake_case` format.
     public func toSnakeCase() -> String {
         guard !isEmpty else { return self }
         var result = ""
@@ -18,5 +27,12 @@ extension String {
             }
         }
         return result
+    }
+    
+    /// In-place conversion from `lowerCamelCaseString` to `snake_case`.
+    /// 
+    /// - SeeAlso: ``String/toSnakeCase()``
+    public mutating func snakeCased() {
+        self = toSnakeCase()
     }
 }
