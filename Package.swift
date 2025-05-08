@@ -1,9 +1,12 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.0
 import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
     name: "NovaToolbox",
+    platforms: [
+        .macOS(.v10_15),
+    ],
     products: [
         .library(
             name: "NovaToolbox",
@@ -18,9 +21,12 @@ let package = Package(
         .macro(
             name: "NovaMacrosImplementation",
             dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
-            ]
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+                .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
+            ] 
         ),
         .target(name: "NovaMacros", dependencies: ["NovaMacrosImplementation"]),
         .target(name: "NovaToolbox"),
