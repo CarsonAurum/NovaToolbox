@@ -23,47 +23,58 @@ public struct PrettyDescriptionMacro: MemberMacro {
         }
         
         // Check for CustomStringConvertible conformance
-        if let inheritanceClause = structDecl.inheritanceClause {
-            let conformsToCodable = inheritanceClause.inheritedTypes
-                .map { $0.type.trimmedDescription }
-                .contains("CustomStringConvertible")
-            if !conformsToCodable {
-                context.diagnose(Diagnostic(node: node, message: PrettyDescriptionDiagnostic.notCustomStringConvertible))
-                return []
-            }
+        guard let inheritanceClause = structDecl.inheritanceClause else {
+            context.diagnose(Diagnostic(node: node, message: PrettyDescriptionDiagnostic.notCustomStringConvertible))
+            return []
         }
-
-        // Collect each property name and whether it's optional
-        var properties: [(name: String, isOptional: Bool)] = []
-        for member in structDecl.memberBlock.members {
-            if let varDecl = member.decl.as(VariableDeclSyntax.self),
-               let binding = varDecl.bindings.first,
-               let id = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier {
-                let isOptional = binding.typeAnnotation?.type.description.hasSuffix("?") ?? false
-                properties.append((name: id.text, isOptional: isOptional))
-            }
+        let conformsToCustomStringConvertible = inheritanceClause.inheritedTypes
+            .map(\.type.trimmedDescription)
+            .contains("CustomStringConvertible")
+        if !conformsToCustomStringConvertible {
+            context.diagnose(Diagnostic(node: node, message: PrettyDescriptionDiagnostic.notCustomStringConvertible))
+            return []
         }
-
-        // Build the body of the description property
-        let lines = properties.map { prop in
-            if prop.isOptional {
-                return "if let value = \(prop.name) { parts.append(\"\(prop.name): \\(value)\") }"
-            } else {
-                return "parts.append(\"\(prop.name): \\(\(prop.name))\")"
+        
+        let conformsToOptionSet = inheritanceClause.inheritedTypes
+            .map(\.type.trimmedDescription)
+            .contains("OptionSet")
+        
+        if conformsToOptionSet {
+            // TODO: Complete this
+            return []
+        } else {
+            // Collect each property name and whether it's optional
+            var properties: [(name: String, isOptional: Bool)] = []
+            for member in structDecl.memberBlock.members {
+                if let varDecl = member.decl.as(VariableDeclSyntax.self),
+                   let binding = varDecl.bindings.first,
+                   let id = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier {
+                    let isOptional = binding.typeAnnotation?.type.description.hasSuffix("?") ?? false
+                    properties.append((name: id.text, isOptional: isOptional))
+                }
             }
-        }.joined(separator: "\n")
-
-        let source = """
-        public var description: String {
-            var parts: [String] = []
-            \(lines)
-            return "[\\(parts.joined(separator: " || "))]"
+            
+            // Build the body of the description property
+            let lines = properties.map { prop in
+                if prop.isOptional {
+                    return "if let value = \(prop.name) { parts.append(\"\(prop.name): \\(value)\") }"
+                } else {
+                    return "parts.append(\"\(prop.name): \\(\(prop.name))\")"
+                }
+            }.joined(separator: "\n")
+            
+            let source = """
+            public var description: String {
+                var parts: [String] = []
+                \(lines)
+                return "[\\(parts.joined(separator: " || "))]"
+            }
+            """
+            
+            // Parse into a DeclSyntax
+            let decl = DeclSyntax(stringLiteral: source)
+            return [decl]
         }
-        """
-
-        // Parse into a DeclSyntax
-        let decl = DeclSyntax(stringLiteral: source)
-        return [decl]
     }
 }
 

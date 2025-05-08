@@ -24,15 +24,17 @@ public struct CodingKeysMacro: MemberMacro {
             return []
         }
         
-        // Ensure the struct conforms to Codable
-        if let inheritanceClause = structDecl.inheritanceClause {
-            let conformsToCodable = inheritanceClause.inheritedTypes
-                .map { $0.type.trimmedDescription }
-                .contains("Codable")
-            if !conformsToCodable {
-                context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.notCodable))
-                return []
-            }
+        // Ensure the macro is used on a struct conforming to Codable.
+        guard let inheritanceClause = structDecl.inheritanceClause else {
+            context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.notCodable))
+            return []
+        }
+        let conformsToCodable = inheritanceClause.inheritedTypes
+            .map { $0.type.trimmedDescription }
+            .contains("Codable")
+        if !conformsToCodable {
+            context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.notCodable))
+            return []
         }
         
         // Parse the argument associated with the macro.
