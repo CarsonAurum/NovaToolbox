@@ -13,4 +13,5 @@ public enum CodingKeysOption {
 }
 
 @attached(member, names: named(CodingKeys))
-public macro CodingKeys(_ type: CodingKeysOption) = #externalMacro(module: "NovaMacrosImplementation", type: "CodingKeysMacro")
+public macro CodingKeys(_ type: CodingKeysOption = .all)
+    = #externalMacro(module: "NovaMacrosImplementation", type: "CodingKeysMacro")

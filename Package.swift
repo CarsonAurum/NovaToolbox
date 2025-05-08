@@ -21,10 +21,13 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-syntax.git", branch: "main")
     ],
     targets: [
+        .target(name: "NovaToolbox", dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax")]),
+        .testTarget(name: "NovaToolboxTests", dependencies: ["NovaToolbox"]),
         .target(name: "NovaMacros", dependencies: ["NovaMacrosImplementation"]),
         .macro(
             name: "NovaMacrosImplementation",
             dependencies: [
+                "NovaToolbox",
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
@@ -32,7 +35,5 @@ let package = Package(
                 .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
             ] 
         ),
-        .target(name: "NovaToolbox"),
-        .testTarget(name: "NovaToolboxTests", dependencies: ["NovaToolbox"]),
     ]
 )

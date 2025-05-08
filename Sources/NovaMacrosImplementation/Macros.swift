@@ -10,5 +10,7 @@ import SwiftSyntaxMacros
 
 @main
 struct CodingKeysPlugin: CompilerPlugin {
-    let providingMacros: [Macro.Type] = [CodingKeysMacro.self]
+    let providingMacros: [Macro.Type] = [
+        CodingKeysMacro.self
+    ]
 }
