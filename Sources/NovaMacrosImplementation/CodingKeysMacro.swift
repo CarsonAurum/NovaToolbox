@@ -27,7 +27,7 @@ public struct CodingKeysMacro: MemberMacro {
         // Ensure the struct conforms to Codable
         if let inheritanceClause = structDecl.inheritanceClause {
             let conformsToCodable = inheritanceClause.inheritedTypes
-                .map { $0.trimmedDescription }
+                .map { $0.type.trimmedDescription }
                 .contains("Codable")
             if !conformsToCodable {
                 context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.notCodable))
