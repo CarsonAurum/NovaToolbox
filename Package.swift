@@ -12,12 +12,16 @@ let package = Package(
             name: "NovaToolbox",
             targets: ["NovaToolbox"]
         ),
-        .library(name: "NovaMacros", targets: ["NovaMacros"])
+        .library(
+            name: "NovaMacros",
+            targets: ["NovaMacros"]
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-syntax.git", branch: "main")
     ],
     targets: [
+        .target(name: "NovaMacros", dependencies: ["NovaMacrosImplementation"]),
         .macro(
             name: "NovaMacrosImplementation",
             dependencies: [
@@ -28,7 +32,6 @@ let package = Package(
                 .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
             ] 
         ),
-        .target(name: "NovaMacros", dependencies: ["NovaMacrosImplementation"]),
         .target(name: "NovaToolbox"),
         .testTarget(name: "NovaToolboxTests", dependencies: ["NovaToolbox"]),
     ]
