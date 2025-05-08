@@ -14,6 +14,7 @@ import SwiftDiagnostics
 enum CodingKeysDiagnostic: DiagnosticMessage {
     case notStruct
     case notCodable
+    case test(String)
 
     var message: String {
         switch self {
@@ -21,6 +22,8 @@ enum CodingKeysDiagnostic: DiagnosticMessage {
             return "‘@CodingKeys’ can only be applied to struct declarations."
         case .notCodable:
             return "Structs annotated with ‘@CodingKeys’ must conform to ‘Codable’."
+        case .test(let string):
+            return string
         }
     }
 
@@ -30,6 +33,8 @@ enum CodingKeysDiagnostic: DiagnosticMessage {
             return MessageID(domain: "CodingKeysMacro", id: "notStruct")
         case .notCodable:
             return MessageID(domain: "CodingKeysMacro", id: "notCodable")
+        case .test(let value):
+            return MessageID(domain: "CodingKeysMacro", id: "test")
         }
     }
 
@@ -71,7 +76,7 @@ public struct CodingKeysMacro: MemberMacro {
             .map { $0.trimmedDescription }
             .contains("Codable")
         if !conformsToCodable {
-            context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.notCodable))
+            context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.test(protocols.description)))
             return []
         }
         return []
