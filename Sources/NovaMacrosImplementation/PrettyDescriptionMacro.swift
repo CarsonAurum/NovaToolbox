@@ -21,6 +21,17 @@ public struct PrettyDescriptionMacro: MemberMacro {
             context.diagnose(Diagnostic(node: node, message: PrettyDescriptionDiagnostic.notStruct))
             return []
         }
+        
+        // Check for CustomStringConvertible conformance
+        if let inheritanceClause = structDecl.inheritanceClause {
+            let conformsToCodable = inheritanceClause.inheritedTypes
+                .map { $0.type.trimmedDescription }
+                .contains("CustomStringConvertible")
+            if !conformsToCodable {
+                context.diagnose(Diagnostic(node: node, message: PrettyDescriptionDiagnostic.notCustomStringConvertible))
+                return []
+            }
+        }
 
         // Collect each property name and whether it's optional
         var properties: [(name: String, isOptional: Bool)] = []
@@ -58,11 +69,14 @@ public struct PrettyDescriptionMacro: MemberMacro {
 
 enum PrettyDescriptionDiagnostic: DiagnosticMessage {
     case notStruct
+    case notCustomStringConvertible
 
     var message: String {
         switch self {
         case .notStruct:
             return "‘@PrettyDescription’ can only be applied to struct declarations."
+        case .notCustomStringConvertible:
+            return "Structs annotated with '@PrettyDescription' must conform to 'CustomStringConvertible'"
         }
     }
 
