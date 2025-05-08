@@ -22,7 +22,6 @@ let package = Package(
     ],
     targets: [
         .target(name: "NovaToolbox", dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax")]),
-        .testTarget(name: "NovaToolboxTests", dependencies: ["NovaToolbox"]),
         .target(name: "NovaMacros", dependencies: ["NovaMacrosImplementation"]),
         .macro(
             name: "NovaMacrosImplementation",

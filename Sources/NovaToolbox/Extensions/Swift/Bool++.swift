@@ -9,9 +9,8 @@ extension Bool {
     
     /// Returns an integer representation of the boolean: 1 for `true` or 0 for `false`.
     ///
-    /// Example:
     ///     let flag = true
-    ///     let value = flag.int // returns 1
+    ///     let value = flag.int    // returns 1
     ///
     /// - Returns: 1 if the boolean is `true`; otherwise, 0.
     @inlinable
@@ -19,9 +18,8 @@ extension Bool {
     
     /// Returns a string representation of the boolean: "true" for `true` or "false" for `false`.
     ///
-    /// Example:
     ///     let flag = false
-    ///     let text = flag.string // returns "false"
+    ///     let text = flag.string    // returns "false"
     ///
     /// - Returns: "true" if the boolean is `true`; otherwise, "false".
     @inlinable

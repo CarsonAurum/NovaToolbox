@@ -198,7 +198,14 @@ fileprivate struct CodingKeysGenerator {
             }) {
                 MemberBlockItemListSyntax(
                     generateStrategy().map { strat in
-                        MemberBlockItemSyntax(decl: EnumCaseDeclSyntax(elements: EnumCaseElementListSyntax(arrayLiteral: strat.enumCaseElementSyntax())))}
+                        MemberBlockItemSyntax(
+                            decl: EnumCaseDeclSyntax(
+                                elements: EnumCaseElementListSyntax(
+                                    arrayLiteral: strat.enumCaseElementSyntax()
+                                )
+                            )
+                        )
+                    }
                 )
         }
     }
