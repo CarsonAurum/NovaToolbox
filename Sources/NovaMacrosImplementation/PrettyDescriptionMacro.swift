@@ -51,7 +51,7 @@ public struct PrettyDescriptionMacro: MemberMacro {
         """
 
         // Parse into a DeclSyntax
-        let decl = DeclSyntax(stringLiteral: source).formatted()
+        let decl = DeclSyntax(stringLiteral: source).formatted().as(DeclSyntax.self)!
         return [decl]
     }
 }
