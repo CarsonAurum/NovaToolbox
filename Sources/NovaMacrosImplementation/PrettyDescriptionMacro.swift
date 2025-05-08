@@ -16,6 +16,43 @@ public struct PrettyDescriptionMacro: MemberMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
+        
+        // Handle enum types
+        if let enumDecl = declaration.as(EnumDeclSyntax.self) {
+            // Ensure the enum conforms to CustomStringConvertible
+            guard let inheritanceClause = enumDecl.inheritanceClause,
+                  inheritanceClause.inheritedTypes
+                      .map(\.type.trimmedDescription)
+                      .contains("CustomStringConvertible")
+            else {
+                context.diagnose(Diagnostic(node: node, message: PrettyDescriptionDiagnostic.notCustomStringConvertible))
+                return []
+            }
+
+            // Collect all case names
+            let caseNames = enumDecl.memberBlock.members.compactMap { member in
+                member.decl.as(EnumCaseDeclSyntax.self)?
+                    .elements.map { $0.name.text }
+            }.flatMap { $0 }
+
+            // Build switch-case lines for description
+            let caseLines = caseNames.map { name in
+                "case .\(name): return \"\(name)\""
+            }.joined(separator: "\n        ")
+
+            let source = """
+            public var description: String {
+                switch self {
+                \(caseLines)
+                }
+            }
+            """
+
+            return [DeclSyntax(stringLiteral: source)]
+        }
+
+        // Handle struct types
+        
         // Ensure the macro is used on a struct
         guard let structDecl = declaration.as(StructDeclSyntax.self) else {
             context.diagnose(Diagnostic(node: node, message: PrettyDescriptionDiagnostic.notStruct))
