@@ -39,7 +39,7 @@ public struct PrettyDescriptionMacro: MemberMacro {
                         let varName = name.prefix(1).lowercased() + name.dropFirst()
                         return "case let .\(name)(\(varName)): return \"\(name.toTitleCase()): [\(varName)]\""
                     } else {
-                        return "case .\\(name): return \"\\(name.toTitleCase())\""
+                        return "case .\(name): return \"\(name.toTitleCase())\""
                     }
                 }
             }.compactMap { $0 }
