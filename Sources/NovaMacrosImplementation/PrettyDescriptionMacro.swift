@@ -37,12 +37,14 @@ public struct PrettyDescriptionMacro: MemberMacro {
                     let name = element.name.text
                     if element.parameterClause != nil {
                         let varName = name.prefix(1).lowercased() + name.dropFirst()
-                        return "case let .\\(name)(\(varName)): return \"\\(name.toTitleCase()): [\\(\(varName))]\""
+                        return "case let .\(name)(\(varName)): return \"\(name.toTitleCase()): [\(varName)]\""
                     } else {
                         return "case .\\(name): return \"\\(name.toTitleCase())\""
                     }
                 }
             }.compactMap { $0 }
+            
+            
 
             let source = #"""
             public var description: String {
