@@ -34,8 +34,8 @@ public struct PrettyDescriptionMacro: MemberMacro {
             let caseLinesArray = enumDecl.memberBlock.members.compactMap { member -> [String]? in
                 guard let enumCase = member.decl.as(EnumCaseDeclSyntax.self) else { return nil }
                 return enumCase.elements.map { element in
-                    let name = element.name.text
-                    if element.parameterClause != nil {
+                    let name = element.identifier.text
+                    if element.associatedValue != nil {
                         let varName = name.prefix(1).lowercased() + name.dropFirst()
                         return "case let .\\(name)(\\(varName)): return \"\\(name.toTitleCase()): [\\(\\(varName))]\""
                     } else {
