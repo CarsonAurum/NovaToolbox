@@ -31,20 +31,20 @@ public struct PrettyDescriptionMacro: MemberMacro {
             }
 
             // Generate description via raw string literal with interpolation
-            let caseLinesArray = enumDecl.memberBlock.members.map { member -> [String]? in
-                guard let enumCase = member.decl.as(EnumCaseDeclSyntax.self) else { return nil }
+            let caseLines = enumDecl.memberBlock.members.flatMap { member -> [String] in
+                guard let enumCase = member.decl.as(EnumCaseDeclSyntax.self) else { return [] }
                 return enumCase.elements.map { element in
                     let name = element.name.text
                     if element.parameterClause != nil {
                         let varName = name.prefix(1).lowercased() + name.dropFirst()
-                        return "case let .\(name)(\(varName)): return \"\(name.toTitleCase()): [\(varName)]\""
+                        return "case let .\(name)(\(varName)): return \"\(name.toTitleCase()): [\\(\(varName))]\""
                     } else {
                         return "case .\(name): return \"\(name.toTitleCase())\""
                     }
                 }
-            }.compactMap { $0 }
+            }
             
-            let lines = caseLinesArray.map { "    \($0)" }.joined(separator: "\n")
+            let lines = caseLines.map { "    \($0)" }.joined(separator: "\n")
 
             let source = #"""
             public var description: String {
