@@ -44,12 +44,12 @@ public struct PrettyDescriptionMacro: MemberMacro {
                 }
             }.compactMap { $0 }
             
-            
+            let lines = caseLinesArray.map { "    \($0)" }.joined(separator: "\n")
 
             let source = #"""
             public var description: String {
                 switch self {
-            \#(caseLinesArray.map { "    \($0)" }.joined(separator: "\n"))
+            \#(lines)
                 }
             }
             """#
