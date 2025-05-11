@@ -91,7 +91,7 @@ public struct PrettyDescriptionMacro: MemberMacro {
 
             // Build the body of the description property for OptionSet
             let optionLines = optionNames.map { name in
-                "if self.contains(.\(name)) { parts.append(\"\(name)\") }"
+                "if self.contains(.\(name)) { parts.append(\"\(name.toTitleCase())\") }"
             }.joined(separator: "\n")
 
             let optionSource = """
@@ -147,9 +147,9 @@ enum PrettyDescriptionDiagnostic: DiagnosticMessage {
     var message: String {
         switch self {
         case .notStruct:
-            return "‘@PrettyDescription’ can only be applied to struct declarations."
+            return "‘@PrettyDescription’ can only be applied to struct/enum declarations."
         case .notCustomStringConvertible:
-            return "Structs annotated with '@PrettyDescription' must conform to 'CustomStringConvertible'"
+            return "Types annotated with '@PrettyDescription' must conform to 'CustomStringConvertible'"
         }
     }
 

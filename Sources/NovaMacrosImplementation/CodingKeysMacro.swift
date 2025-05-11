@@ -30,7 +30,7 @@ public struct CodingKeysMacro: MemberMacro {
             return []
         }
         let conformsToCodable = inheritanceClause.inheritedTypes
-            .map { $0.type.trimmedDescription }
+            .map(\.type.trimmedDescription)
             .contains("Codable")
         if !conformsToCodable {
             context.diagnose(Diagnostic(node: node, message: CodingKeysDiagnostic.notCodable))
