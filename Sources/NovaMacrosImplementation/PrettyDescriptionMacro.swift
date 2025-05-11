@@ -8,6 +8,7 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 import SwiftDiagnostics
+import SwiftSyntaxBuilder
 
 public struct PrettyDescriptionMacro: MemberMacro {
     public static func expansion(
@@ -29,16 +30,19 @@ public struct PrettyDescriptionMacro: MemberMacro {
                 return []
             }
 
-            // Collect all case names
-            let caseNames = enumDecl.memberBlock.members.compactMap { member in
-                member.decl.as(EnumCaseDeclSyntax.self)?
-                    .elements.map { $0.name.text }
-            }.flatMap { $0 }
-
-            // Build switch-case lines for description
-            let caseLines = caseNames.map { name in
-                "case .\(name): return \"\(name.toTitleCase())\""
-            }.joined(separator: "\n        ")
+            // Build switch-case lines for description, handling associated values
+            let caseLines = enumDecl.memberBlock.members.compactMap { member -> [String]? in
+                guard let enumCase = member.decl.as(EnumCaseDeclSyntax.self) else { return nil }
+                return enumCase.elements.map { element in
+                    let name = element.name.text
+                    if element.parameterClause != nil {
+                        let varName = name.prefix(1).lowercased() + name.dropFirst()
+                        return "case let .\\(name)(\\(varName)): return \"\\(name.toTitleCase()): [\\(\\(varName))]\""
+                    } else {
+                        return "case .\\(name): return \"\\(name.toTitleCase())\""
+                    }
+                }
+            }.flatMap { $0 }.joined(separator: "\n        ")
 
             let source = """
             public var description: String {
